@@ -17,24 +17,22 @@
 // D11: control buttons K3;
 
 #define GATE_SERVO_PIN 2
-#define GO_BUTTON_PIN 9
-#define SPEED_SENSE_1 10
+#define GO_BUTTON_PIN 8
+#define SPEED_SENSE_1 9
 #define SPEED_SENSE_2 10
-#define FINISH_SENSE_A 10
-#define FINISH_SENSE_B 11
-#define LANEA_LIGHT_PIN 3
-#define LANEB_LIGHT_PIN 4
+#define FINISH_SENSE_A 11
+#define FINISH_SENSE_B 12
+#define LANEA_LIGHT_PIN 6
+#define LANEB_LIGHT_PIN 7
 
 //#define GATE_SERVO_PIN 2
-//#define GO_BUTTON_PIN 3
-//#define SPEED_SENSE_1 4
-//#define SPEED_SENSE_2 5
-//#define FINISH_SENSE_A 6
-//#define FINISH_SENSE_B 7
-//#define LANEA_LIGHT_PIN 8
-//#define LANEB_LIGHT_PIN 9
-//#define RF_TRANSMIT 10
-//#define RF_RECEIVE 11
+//#define GO_BUTTON_PIN 9
+//#define SPEED_SENSE_1 10
+//#define SPEED_SENSE_2 10
+//#define FINISH_SENSE_A 10
+//#define FINISH_SENSE_B 11
+//#define LANEA_LIGHT_PIN 3
+//#define LANEB_LIGHT_PIN 4
 
 #define MAX_RACE_TIME 50
 #define NOVALUE 0xFFFF
@@ -53,7 +51,7 @@ boolean speedDone;
 byte curState;
 FuseID timeout;
 
-#define DEBUG
+#undef DEBUG
 
 void log(char* s)
 {
@@ -75,13 +73,21 @@ void setup()
 {
 	Serial.begin(115200);
 	
-	pinMode(GO_BUTTON_PIN, INPUT);
-	pinMode(FINISH_SENSE_A, INPUT);
-	pinMode(FINISH_SENSE_B, INPUT);
-	pinMode(SPEED_SENSE_1, INPUT);
-	pinMode(SPEED_SENSE_2, INPUT);
+	pinMode(GO_BUTTON_PIN, INPUT_PULLUP);
+	pinMode(FINISH_SENSE_A, INPUT_PULLUP);
+	pinMode(FINISH_SENSE_B, INPUT_PULLUP);
+	pinMode(SPEED_SENSE_1, INPUT_PULLUP);
+	pinMode(SPEED_SENSE_2, INPUT_PULLUP);
 	pinMode(LANEA_LIGHT_PIN, OUTPUT);
 	pinMode(LANEB_LIGHT_PIN, OUTPUT);
+	
+	digitalWrite(LANEA_LIGHT_PIN,1);
+	delay(500);
+	digitalWrite(LANEA_LIGHT_PIN,0);
+	
+	digitalWrite(LANEB_LIGHT_PIN,1);
+	delay(500);
+	digitalWrite(LANEB_LIGHT_PIN,0);
 	
 	Gate::init( GATE_SERVO_PIN, 10);
 	LaneIndicators::init( LANEA_LIGHT_PIN, LANEB_LIGHT_PIN );
@@ -173,7 +179,7 @@ void printTimes(unsigned int a, unsigned int b)
 void printSpeed(unsigned int s)
 {
 	Serial.print("S:");
-	Serial.print(s);
+	Serial.println(s);
 }
 
 void loop()
