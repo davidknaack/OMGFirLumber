@@ -42,14 +42,17 @@ func fakemonitorSerial(){
 			a := s + 1000
 			b := a + 250 
 
+			h.broadcast <- []byte(fmt.Sprintf("s\r"))
+
 			time.Sleep(s*time.Millisecond)
-			h.broadcast <- []byte(fmt.Sprintf("s:%d", s))
+			h.broadcast <- []byte(fmt.Sprintf("t:%d\r", s))
             
 			time.Sleep(1000*time.Millisecond)
-			h.broadcast <- []byte(fmt.Sprintf("a:%d", a))
+			h.broadcast <- []byte(fmt.Sprintf("a:%d\r", a))
 
 			time.Sleep(250*time.Millisecond)
-			h.broadcast <- []byte(fmt.Sprintf("b:%d", b))
+			h.broadcast <- []byte(fmt.Sprintf("b:%d\r", b))
+			h.broadcast <- []byte(fmt.Sprintf("e\r"))
 		}
     }()
 }

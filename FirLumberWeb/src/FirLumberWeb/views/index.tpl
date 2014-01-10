@@ -27,27 +27,13 @@
 				trap.prepend("<div>"+msg+"</div>");
 			}
 
-			$("#form").submit(function() {
-				if (!conn) {
-					return false;
-				}
-				if (!msg.val()) {
-					return false;
-				}
-				appendLog($("<div><b>sending: "+msg.val()+"</b></div>"))
-				conn.send(msg.val());
-				appendLog($("<div><b>sent: "+msg.val()+"</b></div>"))
-				msg.val("");
-				return false
-			});
-
 			if (window["WebSocket"]) {
 				conn = new WebSocket("ws://{{.host}}/ws");
 				conn.onclose = function(evt) {
 					appendLog($("<div><b>Connection closed.</b></div>"))
 				}
 				conn.onmessage = function(evt) {
-					if (evt.data.substring(0, 2) == "s:"){
+					if (evt.data.substring(0, 2) == "t:"){
 						appendSpeedTrap(evt.data)
 					} else {
 						appendLog($("<div/>").text(evt.data))
@@ -70,7 +56,7 @@
 			}
 
 			.hero-unit {
-				padding: 60px;
+				padding: 20px;
 				margin-bottom: 30px;
 				border-radius: 6px 6px 6px 6px;
 			}
@@ -151,9 +137,5 @@
 		</header>
 		<div id="trap"></div>
 		<div id="log"></div>
-		<form id="form">
-			<input type="submit" value="Send" />
-			<input type="text" id="msg" size="64"/>
-		</form>
 	</body>
 </html>
