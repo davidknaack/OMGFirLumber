@@ -2,7 +2,6 @@
 #include <Servo.h>
 #include <EEPROM.h>
 #include "EventFuse.h"
-#include "Gate.h"
 #include "LaneIndicators.h"
 
 // D2: control blue LED1
@@ -37,6 +36,9 @@
 #define MAX_RACE_TIME 50
 #define NOVALUE 0xFFFF
 
+int GATE_OPEN = 1100;
+int GATE_CLOSE = 1900;
+
 #define rsReady 0
 #define rsRacing 1
 #define rsTimeout 2
@@ -50,6 +52,7 @@ word speedSenseB;
 boolean speedDone;
 byte curState;
 FuseID timeout;
+Servo gate;
 
 #undef DEBUG
 
@@ -84,18 +87,28 @@ void setup()
 	digitalWrite(LANEA_LIGHT_PIN,1);
 	delay(500);
 	digitalWrite(LANEA_LIGHT_PIN,0);
-	
+		
+        gate.attach(GATE_SERVO_PIN, GATE_OPEN, GATE_CLOSE);
+
+        changeGate(0, GATE_OPEN);
+        delay(1000);
+        changeGate(0, GATE_CLOSE);
+
 	digitalWrite(LANEB_LIGHT_PIN,1);
 	delay(500);
 	digitalWrite(LANEB_LIGHT_PIN,0);
-	
-	Gate::init( GATE_SERVO_PIN, 10);
-	LaneIndicators::init( LANEA_LIGHT_PIN, LANEB_LIGHT_PIN );
+
+        LaneIndicators::init( LANEA_LIGHT_PIN, LANEB_LIGHT_PIN );
 
 	MsTimer2::set(100, EventFuse::burn);
 	MsTimer2::start();
 	
 	setState(rsReady);
+}
+
+void changeGate( FuseID fuse, int& userVal)
+{
+        gate.writeMicroseconds(userVal);
 }
 
 void fuseStateChange(FuseID fuse, int& newState)
@@ -128,7 +141,7 @@ void setState(byte newState)
 		case rsReady:
 			log("rsReady\n");
 			checkTransition( (curState == rsReady) || (curState==rsTimeout) || (curState==rsDone), newState);
-			Gate::close();
+			changeGate(0, GATE_CLOSE);
 			LaneIndicators::setAll(LOW);
 			laneATime =	laneBTime =	speedSenseA = speedSenseB = NOVALUE;
 			speedDone = false;
@@ -137,7 +150,9 @@ void setState(byte newState)
 		case rsRacing:
 			log("rsRacing\n");
 			checkTransition( curState == rsReady, newState);
-			Gate::open();
+			changeGate(0, GATE_OPEN);
+                        printStart();
+                        EventFuse::newFuse( GATE_CLOSE, 20, 1, changeGate ); 
 			startTime = millis();
 			timeout = EventFuse::newFuse( rsTimeout, MAX_RACE_TIME, 1, fuseStateChange );
 			break;
@@ -168,17 +183,23 @@ void checkAndUpdate(word &val, uint8_t pin)
 		val = millis() - startTime;
 }
 
+void printStart()
+{
+  Serial.println("s");
+}
+
 void printTimes(unsigned int a, unsigned int b)
 {
-	Serial.print("A:");
+	Serial.print("a:");
 	Serial.println(a);
-	Serial.print("B:");
+	Serial.print("b:");
 	Serial.println(b);
+        Serial.println("e");
 }
 
 void printSpeed(unsigned int s)
 {
-	Serial.print("S:");
+	Serial.print("t:");
 	Serial.println(s);
 }
 

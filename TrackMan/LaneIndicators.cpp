@@ -2,10 +2,17 @@
 #include <LaneIndicators.h>
 
 namespace LaneIndicators
-{	
+{
 	uint8_t _laneAPin;
 	uint8_t _laneBPin;
 
+	/****************************************************************/
+	void setAll(uint8_t state)
+	{
+		digitalWrite( _laneAPin, state);
+		digitalWrite( _laneBPin, state);
+	}
+	
 	/****************************************************************/
 	void init(uint8_t laneAPin, uint8_t laneBPin)
 	{
@@ -13,14 +20,7 @@ namespace LaneIndicators
 		_laneBPin = laneBPin;
 		pinMode( _laneAPin, OUTPUT );
 		pinMode( _laneBPin, OUTPUT );
-		setAll(LOW);
-	}
-	
-	/****************************************************************/
-	void setAll(uint8_t state)
-	{
-		digitalWrite( _laneAPin, state);
-		digitalWrite( _laneBPin, state);
+		setAll(0);
 	}
 	
 	/****************************************************************/

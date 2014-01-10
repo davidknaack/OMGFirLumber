@@ -8,6 +8,6 @@ namespace LaneIndicators
   void init(uint8_t laneAPin, uint8_t laneBPin);
   void setAll(uint8_t state);
   void setCompare(int compare);
-};
+}
 
 #endif
