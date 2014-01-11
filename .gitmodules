@@ -1,0 +1,42 @@
+[submodule "FirLumberWeb/src/github.com/astaxie/beego"]
+	path = FirLumberWeb/src/github.com/astaxie/beego
+	url = https://github.com/astaxie/beego.git
+[submodule "FirLumberWeb/src/github.com/beego/bee"]
+	path = FirLumberWeb/src/github.com/beego/bee
+	url = https://github.com/beego/bee.git
+[submodule "FirLumberWeb/src/github.com/beego/goyaml2"]
+	path = FirLumberWeb/src/github.com/beego/goyaml2
+	url = https://github.com/beego/goyaml2.git
+[submodule "FirLumberWeb/src/github.com/beego/redigo"]
+	path = FirLumberWeb/src/github.com/beego/redigo
+	url = https://github.com/beego/redigo.git
+[submodule "FirLumberWeb/src/github.com/beego/x2j"]
+	path = FirLumberWeb/src/github.com/beego/x2j
+	url = https://github.com/beego/x2j.git
+[submodule "FirLumberWeb/src/github.com/garyburd/go-websocket"]
+	path = FirLumberWeb/src/github.com/garyburd/go-websocket
+	url = https://github.com/garyburd/go-websocket.git
+[submodule "FirLumberWeb/src/github.com/go-sql-driver/mysql"]
+	path = FirLumberWeb/src/github.com/go-sql-driver/mysql
+	url = https://github.com/go-sql-driver/mysql.git
+[submodule "FirLumberWeb/src/github.com/howeyc/fsnotify"]
+	path = FirLumberWeb/src/github.com/howeyc/fsnotify
+	url = https://github.com/howeyc/fsnotify.git
+[submodule "FirLumberWeb/src/github.com/jacobsa/oglematchers"]
+	path = FirLumberWeb/src/github.com/jacobsa/oglematchers
+	url = https://github.com/jacobsa/oglematchers.git
+[submodule "FirLumberWeb/src/github.com/jacobsa/oglemock"]
+	path = FirLumberWeb/src/github.com/jacobsa/oglemock
+	url = https://github.com/jacobsa/oglemock.git
+[submodule "FirLumberWeb/src/github.com/jacobsa/ogletest"]
+	path = FirLumberWeb/src/github.com/jacobsa/ogletest
+	url = https://github.com/jacobsa/ogletest.git
+[submodule "FirLumberWeb/src/github.com/smartystreets/goconvey"]
+	path = FirLumberWeb/src/github.com/smartystreets/goconvey
+	url = https://github.com/smartystreets/goconvey.git
+[submodule "FirLumberWeb/src/github.com/tarm/goserial"]
+	path = FirLumberWeb/src/github.com/tarm/goserial
+	url = https://github.com/tarm/goserial.git
+[submodule "FirLumberWeb/src/github.com/wendal/errors"]
+	path = FirLumberWeb/src/github.com/wendal/errors
+	url = https://github.com/wendal/errors.git
