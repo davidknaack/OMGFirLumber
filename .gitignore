@@ -16,3 +16,8 @@
 *.exe
 *.out
 *.app
+
+# Project-specific ignores
+FirLumberWeb/src/FirLumberWeb/FirLumberWeb
+FirLumberWeb/bin/
+FirLumberWeb/pkg/
