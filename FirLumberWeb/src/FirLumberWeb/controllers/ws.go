@@ -11,6 +11,7 @@ import (
 	"time"
 	"log"
 	"fmt"
+	"encoding/json"
 )
 
 const (
@@ -42,15 +43,15 @@ func fakemonitorSerial(){
 			a := s + 1000
 			b := a + 250 
 
-			h.broadcast <- []byte(fmt.Sprintf("s\r"))
+			h.broadcast <- RaceStart{Type:RACE_START}
 
 			time.Sleep(s*time.Millisecond)
-			h.broadcast <- []byte(fmt.Sprintf("t:%d\r", s))
+			h.broadcast <- TrapTime{Type: TRAP_TIME, Time: s}
             
 			time.Sleep(1250*time.Millisecond)
-			h.broadcast <- []byte(fmt.Sprintf("a:%d\r", a))
-			h.broadcast <- []byte(fmt.Sprintf("b:%d\r", b))
-			h.broadcast <- []byte(fmt.Sprintf("e\r"))
+			h.broadcast <- LaneTime{Type: LANE_TIME, Lane: "a", Time: a}
+			h.broadcast <- LaneTime{Type: LANE_TIME, Lane: "b", Time: b}
+			h.broadcast <- RaceEnd{Type: RACE_END}
 		}
     }()
 }
@@ -157,7 +158,7 @@ type hub struct {
 	connections map[*connection]bool
 
 	// Inbound messages from the connections.
-	broadcast chan []byte
+	broadcast chan WSMessage
 
 	// Register requests from the connections.
 	register chan *connection
@@ -167,7 +168,7 @@ type hub struct {
 }
 
 var h = &hub{
-	broadcast:   make(chan []byte, maxMessageSize),
+	broadcast:   make(chan WSMessage),
 	register:    make(chan *connection, 1),
 	unregister:  make(chan *connection, 1),
 	connections: make(map[*connection]bool),
@@ -183,9 +184,15 @@ func (h *hub) run() {
 			delete(h.connections, c)
 			close(c.send)
 		case m := <-h.broadcast:
+			log.Printf("hub.broadcast %v\n", m)
+			jsonByteBuffer, err := json.Marshal(m)
+			if err != nil {
+				log.Printf("Unable to json.Marshal this: %#v\n", m)
+				panic(err)
+			}
 			for c := range h.connections {
 				select {
-				case c.send <- m:
+				case c.send <- jsonByteBuffer:
 				default:
 					close(c.send)
 					delete(h.connections, c)

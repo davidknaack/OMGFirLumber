@@ -30,14 +30,20 @@
 			if (window["WebSocket"]) {
 				conn = new WebSocket("ws://{{.host}}/ws");
 				conn.onclose = function(evt) {
-					appendLog($("<div><b>Connection closed.</b></div>"))
+					appendLog($("<div><b>Connection closed.</b></div>"));
 				}
 				conn.onmessage = function(evt) {
-					if (evt.data.substring(0, 2) == "t:"){
-						appendSpeedTrap(evt.data)
-					} else {
-						appendLog($("<div/>").text(evt.data))
-					}
+                    var msg = $.parseJSON(evt.data);
+                    console.log(msg);
+                    if (msg.Type == "TrapTime") {
+                        appendSpeedTrap("Trap Time: " + msg.Time);
+                    } else if (msg.Type == "RaceStart") {
+                        appendLog($("<div/>").text("Race Start"))
+                    } else if (msg.Type == "RaceEnd") {
+                        appendLog($("<div/>").text("Race End"))
+                    } else if (msg.Type == "LaneTime") {
+                        appendLog($("<div/>").text("Lane Time for " + msg.Lane + ": " + msg.Time));
+                    }
 				}
 			} else {
 				appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"))

@@ -21,3 +21,8 @@
 FirLumberWeb/src/FirLumberWeb/FirLumberWeb
 FirLumberWeb/bin/
 FirLumberWeb/pkg/
+
+# These are because James likes editor plugins
+FirLumberWeb/.idea
+# ... that are broken
+FirLumberWeb/src/github.com/tarm/serial
