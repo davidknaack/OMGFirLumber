@@ -48,9 +48,12 @@ func fakemonitorSerial(){
 			time.Sleep(s*time.Millisecond)
 			h.broadcast <- TrapTime{Type: TRAP_TIME, Time: s}
             
-			time.Sleep(1250*time.Millisecond)
+			time.Sleep(1000*time.Millisecond)
 			h.broadcast <- LaneTime{Type: LANE_TIME, Lane: "a", Time: a}
+
+			time.Sleep(250*time.Millisecond)
 			h.broadcast <- LaneTime{Type: LANE_TIME, Lane: "b", Time: b}
+			
 			h.broadcast <- RaceEnd{Type: RACE_END}
 		}
     }()
