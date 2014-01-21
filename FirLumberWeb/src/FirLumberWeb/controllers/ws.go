@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"bufio"
 	"time"
 	"log"
@@ -31,36 +32,11 @@ const (
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	go h.run()
-	go fakemonitorSerial()
-}
-
-func fakemonitorSerial(){
-	go func() { 
-		for i := 0; ; i++ {
-            time.Sleep(5000 * time.Millisecond)
-			
-			s := time.Duration(rand.Intn(1000))
-			a := s + 1000
-			b := a + 250 
-
-			h.broadcast <- RaceStart{Type:RACE_START}
-
-			time.Sleep(s*time.Millisecond)
-			h.broadcast <- TrapTime{Type: TRAP_TIME, Time: s}
-            
-			time.Sleep(1000*time.Millisecond)
-			h.broadcast <- LaneTime{Type: LANE_TIME, Lane: "a", Time: a}
-
-			time.Sleep(250*time.Millisecond)
-			h.broadcast <- LaneTime{Type: LANE_TIME, Lane: "b", Time: b}
-			
-			h.broadcast <- RaceEnd{Type: RACE_END}
-		}
-    }()
+	go monitorSerial()
 }
 
 func monitorSerial(){
-	c0 := &serial.Config{Name: "COM3", Baud: 115200}
+	c0 := &serial.Config{Name: "COM4", Baud: 115200}
 
 	s, err := serial.OpenPort(c0)
 	if err != nil {
@@ -73,8 +49,58 @@ func monitorSerial(){
 		if err != nil {
 			panic(err)
 		}
-		h.broadcast <- buf
-		log.Println(string(buf))
+		handleSerialLine(string(buf[:]))
+	}
+}
+
+func fakemonitorSerial(){
+	go func() { 
+		for i := 0; ; i++ {
+            time.Sleep(5000 * time.Millisecond)
+			
+			t := rand.Intn(1000000)
+			a := t + 1000000
+			b := a + 250000
+
+			handleSerialLine("s"+"\r");
+			
+			time.Sleep(time.Duration(t/1000) * time.Millisecond)
+            handleSerialLine("t:"+strconv.Itoa(t)+"\r")
+			
+			time.Sleep(1000*time.Millisecond)
+			handleSerialLine("a:"+strconv.Itoa(a)+"\r")
+			
+			time.Sleep(250*time.Millisecond)
+			handleSerialLine("b:"+strconv.Itoa(b)+"\r")
+			
+			handleSerialLine("e"+"\r");
+		}
+    }()
+}
+
+func getDuration(s string) time.Duration {
+	t, e := strconv.Atoi(s)
+	if e != nil {
+		log.Println( "time format error: " + s)
+		return time.Duration(0);
+	}
+	//log.Println( "time format converted: " + s)
+	return time.Duration(t)*time.Microsecond;
+}
+
+func handleSerialLine(inp string){
+	//log.Println(inp)
+	inp = inp[:len(inp)-2]
+	
+	switch string(inp[0]) {
+		case "s": 
+			h.broadcast <- RaceStart{Type:RACE_START}
+		case "t":
+			h.broadcast <- TrapTime{Type: TRAP_TIME, Time: getDuration(inp[2:])}
+		case "a","b":
+			h.broadcast <- LaneTime{Type: LANE_TIME, Lane: string(inp[0]), Time: getDuration(inp[2:])}
+		case "e":
+			h.broadcast <- RaceEnd{Type: RACE_END}
 	}
 }
 

@@ -15,23 +15,23 @@
 // D10: control keys K2;
 // D11: control buttons K3;
 
-#define GATE_SERVO_PIN 2
-#define GO_BUTTON_PIN 8
-#define SPEED_SENSE_1 9
-#define SPEED_SENSE_2 10
-#define FINISH_SENSE_A 11
-#define FINISH_SENSE_B 12
-#define LANEA_LIGHT_PIN 6
-#define LANEB_LIGHT_PIN 7
-
 //#define GATE_SERVO_PIN 2
-//#define GO_BUTTON_PIN 9
-//#define SPEED_SENSE_1 10
+//#define GO_BUTTON_PIN 8
+//#define SPEED_SENSE_1 9
 //#define SPEED_SENSE_2 10
-//#define FINISH_SENSE_A 10
-//#define FINISH_SENSE_B 11
-//#define LANEA_LIGHT_PIN 3
-//#define LANEB_LIGHT_PIN 4
+//#define FINISH_SENSE_A 11
+//#define FINISH_SENSE_B 12
+//#define LANEA_LIGHT_PIN 6
+//#define LANEB_LIGHT_PIN 7
+
+#define GATE_SERVO_PIN 2
+#define GO_BUTTON_PIN 9
+#define SPEED_SENSE_1 10
+#define SPEED_SENSE_2 11
+#define FINISH_SENSE_A 10
+#define FINISH_SENSE_B 11
+#define LANEA_LIGHT_PIN 3
+#define LANEB_LIGHT_PIN 4
 
 #define MAX_RACE_TIME 50
 #define NOVALUE 0xFFFFFFFF
@@ -215,9 +215,9 @@ void loop()
 		case rsRacing:
 			checkAndUpdate(laneATime, FINISH_SENSE_A); 
 			checkAndUpdate(laneBTime, FINISH_SENSE_B); 
-			checkAndUpdate(speedSenseA, SPEED_SENSE_1); 
                         if (speedSenseA<NOVALUE)
 			  checkAndUpdate(speedSenseB, SPEED_SENSE_2); 
+			checkAndUpdate(speedSenseA, SPEED_SENSE_1); 
 
 			if (!speedDone&&(speedSenseB<NOVALUE))
 			{

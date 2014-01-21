@@ -14,8 +14,8 @@
       var times = {}; // per-lane times (determine winner)
 
       // Calibration constants
-      var trap_dist = 30; // trap distance in cm
-      var cmps_to_mph = 22.3693629; // cm -> mph constant
+      var trap_dist = 10; // trap distance in cm
+      var cmps_to_mph = 22369362.9; // cm -> mph constant
       var convert = trap_dist * cmps_to_mph; // convert / trap_ms -> mph
 
 
@@ -73,7 +73,7 @@
 
         if (msg.Type == "TrapTime") {
           var trap_txt = "-";
-          if ( msg.Time != 65535 ) {
+          if ( msg.Time != 4294967295000 ) {
             trap_txt = (convert / msg.Time).toFixed(2) + " mph";
           }
           $('#trap-results .row:first-child').text(trap_txt);
@@ -91,8 +91,12 @@
           $('#race-results .row:first-child').find('.' + winner).addClass("winner");
         } else if (msg.Type == "LaneTime") {
           times[msg.Lane] = msg.Time;
-          var time_text = (msg.Time/1000).toFixed(3) + " s";
-          $('#race-results .row:first-child').find('.' + msg.Lane).text(time_text);
+          if ( msg.Time == 4294967295000 ) {
+			$('#race-results .row:first-child').find('.' + msg.Lane).text("DNF");
+          } else {
+			var time_text = (msg.Time/1000000000).toFixed(3) + " s";
+			$('#race-results .row:first-child').find('.' + msg.Lane).text(time_text);
+		  }
         }
       };
 
