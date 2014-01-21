@@ -34,7 +34,7 @@
 //#define LANEB_LIGHT_PIN 4
 
 #define MAX_RACE_TIME 50
-#define NOVALUE 0xFFFF
+#define NOVALUE 0xFFFFFFFF
 
 int GATE_OPEN = 1100;
 int GATE_CLOSE = 1900;
@@ -45,10 +45,10 @@ int GATE_CLOSE = 1900;
 #define rsDone 3
 
 unsigned long startTime;
-word laneATime;
-word laneBTime;
-word speedSenseA;
-word speedSenseB;
+unsigned long laneATime;
+unsigned long laneBTime;
+unsigned long speedSenseA;
+unsigned long speedSenseB;
 boolean speedDone;
 byte curState;
 FuseID timeout;
@@ -143,7 +143,7 @@ void setState(byte newState)
 			checkTransition( (curState == rsReady) || (curState==rsTimeout) || (curState==rsDone), newState);
 			changeGate(0, GATE_CLOSE);
 			LaneIndicators::setAll(LOW);
-			laneATime =	laneBTime =	speedSenseA = speedSenseB = NOVALUE;
+			laneATime = laneBTime = speedSenseA = speedSenseB = NOVALUE;
 			speedDone = false;
 			break;
 			
@@ -153,7 +153,7 @@ void setState(byte newState)
 			changeGate(0, GATE_OPEN);
                         printStart();
                         EventFuse::newFuse( GATE_CLOSE, 20, 1, changeGate ); 
-			startTime = millis();
+			startTime = micros();
 			timeout = EventFuse::newFuse( rsTimeout, MAX_RACE_TIME, 1, fuseStateChange );
 			break;
 			
@@ -177,10 +177,10 @@ void setState(byte newState)
 	curState = newState;
 }
 
-void checkAndUpdate(word &val, uint8_t pin)
+void checkAndUpdate(unsigned long &val, uint8_t pin)
 {
 	if((val==NOVALUE)&&(!digitalRead(pin)))
-		val = millis() - startTime;
+		val = micros() - startTime;
 }
 
 void printStart()
@@ -188,7 +188,7 @@ void printStart()
   Serial.println("s");
 }
 
-void printTimes(unsigned int a, unsigned int b)
+void printTimes(unsigned long a, unsigned long b)
 {
 	Serial.print("a:");
 	Serial.println(a);
@@ -197,7 +197,7 @@ void printTimes(unsigned int a, unsigned int b)
         Serial.println("e");
 }
 
-void printSpeed(unsigned int s)
+void printSpeed(unsigned long s)
 {
 	Serial.print("t:");
 	Serial.println(s);
@@ -216,9 +216,10 @@ void loop()
 			checkAndUpdate(laneATime, FINISH_SENSE_A); 
 			checkAndUpdate(laneBTime, FINISH_SENSE_B); 
 			checkAndUpdate(speedSenseA, SPEED_SENSE_1); 
-			checkAndUpdate(speedSenseB, SPEED_SENSE_2); 
+                        if (speedSenseA<NOVALUE)
+			  checkAndUpdate(speedSenseB, SPEED_SENSE_2); 
 
-			if (!speedDone&&(speedSenseA<NOVALUE)&&(speedSenseB<NOVALUE))
+			if (!speedDone&&(speedSenseB<NOVALUE))
 			{
 				speedDone = true;
 				printSpeed(speedSenseB-speedSenseA);
