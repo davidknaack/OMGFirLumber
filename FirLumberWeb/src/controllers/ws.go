@@ -1,18 +1,16 @@
 package controllers
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/garyburd/go-websocket/websocket"
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"github.com/gorilla/websocket"
 	"github.com/tarm/goserial"
-	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
-	"bufio"
 	"time"
-	"log"
-	"fmt"
-	"encoding/json"
 )
 
 const (
@@ -32,10 +30,10 @@ const (
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	go h.run()
-	go monitorSerial()
+	go fakemonitorSerial()
 }
 
-func monitorSerial(){
+func monitorSerial() {
 	c0 := &serial.Config{Name: "COM4", Baud: 115200}
 
 	s, err := serial.OpenPort(c0)
@@ -53,54 +51,57 @@ func monitorSerial(){
 	}
 }
 
-func fakemonitorSerial(){
-	go func() { 
+func fakemonitorSerial() {
+	go func() {
 		for i := 0; ; i++ {
-            time.Sleep(5000 * time.Millisecond)
-			
+			time.Sleep(5000 * time.Millisecond)
+
 			t := rand.Intn(1000000)
 			a := t + 1000000
 			b := a + 250000
 
-			handleSerialLine("s"+"\r");
-			
+			handleSerialLine("s" + "\r")
+
 			time.Sleep(time.Duration(t/1000) * time.Millisecond)
-            handleSerialLine("t:"+strconv.Itoa(t)+"\r")
-			
-			time.Sleep(1000*time.Millisecond)
-			handleSerialLine("a:"+strconv.Itoa(a)+"\r")
-			
-			time.Sleep(250*time.Millisecond)
-			handleSerialLine("b:"+strconv.Itoa(b)+"\r")
-			
-			handleSerialLine("e"+"\r");
+			handleSerialLine("t:" + strconv.Itoa(t) + "\r")
+
+			time.Sleep(1000 * time.Millisecond)
+			handleSerialLine("a:" + strconv.Itoa(a) + "\r")
+
+			time.Sleep(250 * time.Millisecond)
+			handleSerialLine("b:" + strconv.Itoa(b) + "\r")
+
+			handleSerialLine("e" + "\r")
 		}
-    }()
+	}()
 }
 
 func getDuration(s string) time.Duration {
 	t, e := strconv.Atoi(s)
 	if e != nil {
-		log.Println( "time format error: " + s)
-		return time.Duration(0);
+		log.Println("time format error: " + s)
+		return time.Duration(0)
 	}
 	//log.Println( "time format converted: " + s)
-	return time.Duration(t)*time.Microsecond;
+	return time.Duration(t) * time.Microsecond
 }
 
-func handleSerialLine(inp string){
+func handleSerialLine(inp string) {
 	//log.Println(inp)
 	inp = inp[:len(inp)-2]
-	
+	if len(inp) == 0 {
+		return
+	}
+
 	switch string(inp[0]) {
-		case "s": 
-			h.broadcast <- RaceStart{Type:RACE_START}
-		case "t":
-			h.broadcast <- TrapTime{Type: TRAP_TIME, Time: getDuration(inp[2:])}
-		case "a","b":
-			h.broadcast <- LaneTime{Type: LANE_TIME, Lane: string(inp[0]), Time: getDuration(inp[2:])}
-		case "e":
-			h.broadcast <- RaceEnd{Type: RACE_END}
+	case "s":
+		h.broadcast <- RaceStart{Type: RACE_START}
+	case "t":
+		h.broadcast <- TrapTime{Type: TRAP_TIME, Time: getDuration(inp[2:])}
+	case "a", "b":
+		h.broadcast <- LaneTime{Type: LANE_TIME, Lane: string(inp[0]), Time: getDuration(inp[2:])}
+	case "e":
+		h.broadcast <- RaceEnd{Type: RACE_END}
 	}
 }
 
@@ -124,23 +125,15 @@ func (c *connection) readPump() {
 	}()
 	c.ws.SetReadLimit(maxMessageSize)
 	c.ws.SetReadDeadline(time.Now().Add(readWait))
+	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(readWait)); return nil })
 	for {
-		op, r, err := c.ws.NextReader()
+		_, message, err := c.ws.ReadMessage()
 		if err != nil {
+			log.Println("websocket read error")
 			break
 		}
-		switch op {
-		case websocket.OpPong:
-			c.ws.SetReadDeadline(time.Now().Add(readWait))
-		case websocket.OpText:
-			message, err := ioutil.ReadAll(r)
-			if err != nil {
-				log.Println("websocket read error")
-				break
-			}
-			log.Println(fmt.Sprintf("websocket read: %s", string(message)))
-			h.broadcast <- []byte(c.username + "_" + time.Now().Format("15:04:05") + ":" + string(message))
-		}
+		log.Println(fmt.Sprintf("websocket read: %s", string(message)))
+		h.broadcast <- []byte(c.username + "_" + time.Now().Format("15:04:05") + ":" + string(message))
 	}
 	log.Println("readPump stop")
 }
@@ -163,18 +156,18 @@ func (c *connection) writePump() {
 		select {
 		case message, ok := <-c.send:
 			if !ok {
-				log.Println("connection not ok, closing");
-				c.write(websocket.OpClose, []byte{})
+				log.Println("connection not ok, closing")
+				c.write(websocket.CloseMessage, []byte{})
 				return
 			}
 			log.Println(fmt.Sprintf("websocket send: %s", string(message)))
-			if err := c.write(websocket.OpText, message); err != nil {
+			if err := c.write(websocket.TextMessage, message); err != nil {
 				return
 			}
 		case <-ticker.C:
 			//c.write(websocket.OpText, []byte("ping"))
-			if err := c.write(websocket.OpPing, []byte{}); err != nil {
-				log.Println("ticker ping err ");
+			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
+				log.Println("ticker ping err ")
 				return
 			}
 		}
@@ -232,18 +225,15 @@ func (h *hub) run() {
 	log.Println("hub run stop")
 }
 
-type WSController struct {
-	beego.Controller
-}
-
-func (this *WSController) Get() {
-	ws, err := websocket.Upgrade(this.Ctx.ResponseWriter, this.Ctx.Request.Header, nil, 1024, 1024)
+func WSGet(w http.ResponseWriter, req *http.Request) {
+	log.Printf("WSGet")
+	ws, err := websocket.Upgrade(w, req, nil, 1024, 1024)
 	if _, ok := err.(websocket.HandshakeError); ok {
-		http.Error(this.Ctx.ResponseWriter, "Not a websocket handshake", 400)
+		http.Error(w, "Not a websocket handshake", 400)
 		return
 	} else if err != nil {
 	}
-		
+
 	c := &connection{send: make(chan []byte, 256), ws: ws, username: randomString(10)}
 	h.register <- c
 	go c.writePump()
