@@ -2,7 +2,7 @@
 WebSocket message framing.
 
 All messages are converted to JSON. Every message has a 'Type' field.
- */
+*/
 package controllers
 
 import "time"
@@ -21,20 +21,20 @@ const (
 )
 
 type RaceStart struct {
-	Type      string
+	Type string
 }
 
 type TrapTime struct {
-	Type     string
-	Time     time.Duration
+	Type string
+	Time time.Duration
 }
 
 type LaneTime struct {
-	Type     string
-	Lane     string
-	Time     time.Duration
+	Type string
+	Time time.Duration
+	Lane string
 }
 
 type RaceEnd struct {
-	Type    string
+	Type string
 }
