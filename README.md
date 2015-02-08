@@ -8,7 +8,7 @@ Getting started (hacking)
 
 ```bash
 git clone https://github.com/davidknaack/OMGFirLumber.git
-cd OMGFirLumber
+cd OMGFirLumber/FirLumberWeb
 ./setup-env.sh
 ```
 Start a background task (tmux is a good choice for this) and
