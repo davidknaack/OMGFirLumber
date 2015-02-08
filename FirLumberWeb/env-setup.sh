@@ -1,4 +1,7 @@
 #!/bin/bash
+export GOPATH=$PWD
+export PATH=$PATH:$GOPATH/bin
+
 go get github.com/gorilla/websocket
 go get github.com/go-martini/martini
 go get github.com/martini-contrib/render
