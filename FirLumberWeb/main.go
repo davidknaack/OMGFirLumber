@@ -16,8 +16,25 @@ type User struct {
 	User string
 }
 
-func indexGetHandler(ren render.Render) {
-	ren.HTML(200, "index", nil)
+type PageModel struct {
+	User string
+	Host string
+}
+
+// Populate and return common PageModel contents
+func getPageModel(req *http.Request, s sessions.Session) PageModel {
+	m := PageModel{"", req.Host}
+
+	if u := s.Get("username"); u != nil {
+		m.User = u.(string)
+	}
+
+	return m
+}
+
+func indexGetHandler(req *http.Request, ren render.Render, s sessions.Session) {
+	m := getPageModel(req, s)
+	ren.HTML(200, "index", m)
 }
 
 func requireLogin(rw http.ResponseWriter, req *http.Request, s sessions.Session, db *sqlx.DB, c martini.Context) {
