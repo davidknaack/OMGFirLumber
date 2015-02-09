@@ -95,7 +95,7 @@
 
       var openConnection = function() {
         // Connect and set callbacks
-        conn = new WebSocket("ws://{{.host}}/ws");
+        conn = new WebSocket("ws://{{.Host}}/ws");
         conn.onclose = connectionError;
         conn.onerror = connectionError;
         conn.onmessage = messageReceived;

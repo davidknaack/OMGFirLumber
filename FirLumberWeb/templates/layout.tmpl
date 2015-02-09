@@ -28,10 +28,11 @@
                             <li><a href="/">Home</a></li>
                          </ul>
                          <ul class="nav navbar-nav navbar-right">
-                            <li><a href="/adminlogin">Login</a></li>
-                         </ul>
-                         <ul class="nav navbar-nav navbar-right">
+                        {{if .User }}
                             <li><a href="/adminlogout">Logout</a></li>
+                        {{else}}
+                            <li><a href="/adminlogin">Login</a></li>
+                        {{end}}
                          </ul>
                      </div><!--/.nav-collapse -->
                   </div><!--/.container-fluid -->
