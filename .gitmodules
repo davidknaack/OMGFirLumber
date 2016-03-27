@@ -34,9 +34,6 @@
 [submodule "FirLumberWeb/src/github.com/smartystreets/goconvey"]
 	path = FirLumberWeb/src/github.com/smartystreets/goconvey
 	url = https://github.com/smartystreets/goconvey.git
-[submodule "FirLumberWeb/src/github.com/tarm/goserial"]
-	path = FirLumberWeb/src/github.com/tarm/goserial
-	url = https://github.com/tarm/goserial.git
 [submodule "FirLumberWeb/src/github.com/wendal/errors"]
 	path = FirLumberWeb/src/github.com/wendal/errors
 	url = https://github.com/wendal/errors.git

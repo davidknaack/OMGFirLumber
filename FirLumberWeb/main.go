@@ -9,7 +9,7 @@ import (
 	"log"
 	"net/http"
 
-	"controllers"
+	"github.com/davidknaack/OMGFirLumber/FirLumberWeb/controllers"
 )
 
 type User struct {
